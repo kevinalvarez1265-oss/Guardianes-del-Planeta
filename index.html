@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Defensor Seaflower: Batalla Arcade</title>
     
     <!-- Librería de estilos Tailwind -->
@@ -14,14 +14,19 @@
     <style>
         body { 
             margin: 0; 
+            padding: 0;
+            width: 100vw;
+            height: 100dvh; /* Altura dinámica exacta para móviles */
+            position: relative; /* Asegura que el botón de fuego se ancle correctamente */
             overflow: hidden; 
             /* FONDO DE MAR (Degradado azul océano) */
             background: linear-gradient(180deg, #0284c7 0%, #0369a1 40%, #082f49 100%); 
             touch-action: none; 
             font-family: 'Inter', sans-serif; 
             user-select: none; 
+            -webkit-user-select: none; /* Previene selección de texto en móviles */
         }
-        #gameCanvas { display: block; width: 100vw; height: 100vh; cursor: crosshair; }
+        #gameCanvas { display: block; width: 100%; height: 100%; cursor: crosshair; }
         
         /* UI Overlays */
         .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; background: rgba(2, 6, 23, 0.85); z-index: 10; backdrop-filter: blur(5px); }
@@ -33,15 +38,28 @@
         .floating { animation: float 3s ease-in-out infinite; }
         @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
 
-        #ui-bar { position: absolute; top: 0; left: 0; width: 100%; padding: 10px 20px; display: flex; justify-content: space-between; align-items: flex-start; z-index: 5; pointer-events: none; }
+        #ui-bar { 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            /* El padding usa safe-area para esquivar la cámara de los celulares modernos */
+            padding: max(15px, env(safe-area-inset-top)) max(15px, env(safe-area-inset-right)) 10px max(15px, env(safe-area-inset-left)); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: flex-start; 
+            z-index: 5; 
+            pointer-events: none; 
+            box-sizing: border-box;
+        }
         
-        /* BOTÓN DE DISPARO MÓVIL */
+        /* BOTÓN DE DISPARO MÓVIL RESPONSIVO */
         #fireButton {
             position: absolute;
-            bottom: 40px;
-            right: 40px;
-            width: 100px;
-            height: 100px;
+            bottom: max(30px, env(safe-area-inset-bottom));
+            right: max(30px, env(safe-area-inset-right));
+            width: 75px;  /* Más pequeño para celular */
+            height: 75px;
             border-radius: 50%;
             background: radial-gradient(circle, #ef4444 0%, #b91c1c 100%);
             border: 4px solid #fca5a5;
@@ -50,7 +68,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 40px;
+            font-size: 30px;
             color: white;
             font-weight: 900;
             cursor: pointer;
@@ -62,6 +80,16 @@
             box-shadow: 0 0 15px rgba(239, 68, 68, 0.8), inset 0 0 20px rgba(0,0,0,0.5);
         }
         #fireButton.hidden { display: none !important; }
+
+        @media (min-width: 768px) {
+            #fireButton {
+                width: 100px;
+                height: 100px;
+                bottom: 40px;
+                right: 40px;
+                font-size: 40px;
+            }
+        }
         
         /* Scrollbar para el leaderboard */
         #leaderboardList::-webkit-scrollbar { width: 4px; }
@@ -70,34 +98,34 @@
 </head>
 <body>
 
-    <!-- UI DEL JUEGO (Puntaje, Vidas, Tiempo, Logos) -->
+    <!-- UI DEL JUEGO (Puntaje, Vidas, Tiempo, Logos) Ajustada para celulares -->
     <div id="ui-bar">
-        <div class="flex flex-col gap-2">
-            <div class="bg-blue-900/80 border border-blue-400 text-white px-3 py-1 rounded-lg text-sm font-black tracking-widest shadow-lg">
-                PUNTOS: <span id="scoreDisplay" class="text-yellow-400 text-lg">0</span>
+        <div class="flex flex-col gap-1 sm:gap-2">
+            <div class="bg-blue-900/80 border border-blue-400 text-white px-2 py-1 sm:px-3 sm:py-1 rounded-lg text-[10px] sm:text-sm font-black tracking-widest shadow-lg">
+                PUNTOS: <span id="scoreDisplay" class="text-yellow-400 text-sm sm:text-lg">0</span>
             </div>
-            <div class="bg-red-900/80 border border-red-400 text-white px-3 py-1 rounded-lg text-sm font-black shadow-lg">
-                VIDAS: <span id="livesDisplay" class="text-red-400 text-lg">❤️❤️❤️</span>
+            <div class="bg-red-900/80 border border-red-400 text-white px-2 py-1 sm:px-3 sm:py-1 rounded-lg text-[10px] sm:text-sm font-black shadow-lg">
+                VIDAS: <span id="livesDisplay" class="text-red-400 text-xs sm:text-lg">❤️❤️❤️</span>
             </div>
         </div>
         
-        <div class="flex flex-col items-end gap-2">
-            <div class="bg-slate-900/80 border border-slate-400 text-white px-4 py-2 rounded-xl text-xl font-black shadow-lg flex items-center gap-2">
+        <div class="flex flex-col items-end gap-1 sm:gap-2">
+            <div class="bg-slate-900/80 border border-slate-400 text-white px-2 py-1 sm:px-4 sm:py-2 rounded-xl text-sm sm:text-xl font-black shadow-lg flex items-center gap-2">
                 ⏱️ <span id="timeDisplay" class="text-teal-400">07:00</span>
             </div>
             
-            <!-- Logos -->
-            <div class="flex gap-2 mt-1 pointer-events-auto">
+            <!-- Logos Responsivos -->
+            <div class="flex gap-1 sm:gap-2 mt-1 pointer-events-auto">
                 <!-- Imagen real del logo de Punto Azul -->
-                <img src="logo-punto-azul.png" id="imgLogoPuntoAzul" onerror="this.style.display='none'; document.getElementById('cssLogoPuntoAzul').style.display='flex';" class="h-8 object-contain bg-white/90 p-1 rounded shadow" alt="Punto Azul">
-                <div id="cssLogoPuntoAzul" style="display: none;" class="bg-white/95 px-2 py-1 rounded-md border-b-2 border-blue-300 items-center justify-center gap-1.5 shadow-md">
-                    <div class="w-3 h-3 bg-[#004aad] rounded-full shadow-inner"></div>
-                    <span style="font-family: Calibri, 'Times New Roman', sans-serif;" class="text-[11px] font-black text-[#004aad] leading-none tracking-wide">PUNTO<br>AZUL</span>
+                <img src="logo-punto-azul.png" id="imgLogoPuntoAzul" onerror="this.style.display='none'; document.getElementById('cssLogoPuntoAzul').style.display='flex';" class="h-6 sm:h-8 object-contain bg-white/90 p-0.5 sm:p-1 rounded shadow" alt="Punto Azul">
+                <div id="cssLogoPuntoAzul" style="display: none;" class="bg-white/95 px-1 sm:px-2 py-0.5 sm:py-1 rounded-md border-b-2 border-blue-300 items-center justify-center gap-1 shadow-md">
+                    <div class="w-2 h-2 sm:w-3 sm:h-3 bg-[#004aad] rounded-full shadow-inner"></div>
+                    <span style="font-family: Calibri, 'Times New Roman', sans-serif;" class="text-[8px] sm:text-[11px] font-black text-[#004aad] leading-none tracking-wide">PUNTO<br>AZUL</span>
                 </div>
                 
                 <!-- Imagen real del logo de On Vacation -->
-                <img src="logo-on-vacation.png" id="imgLogoOnVac" onerror="this.style.display='none'; document.getElementById('cssLogoOnVac').style.display='flex';" class="h-8 object-contain bg-white/90 p-1 rounded shadow" alt="On Vacation">
-                <div id="cssLogoOnVac" style="display: none;" class="bg-orange-100 p-1 rounded-md border border-orange-200 text-[8px] font-black text-orange-800 text-center items-center justify-center w-16 h-8 opacity-80 shadow">
+                <img src="logo-on-vacation.png" id="imgLogoOnVac" onerror="this.style.display='none'; document.getElementById('cssLogoOnVac').style.display='flex';" class="h-6 sm:h-8 object-contain bg-white/90 p-0.5 sm:p-1 rounded shadow" alt="On Vacation">
+                <div id="cssLogoOnVac" style="display: none;" class="bg-orange-100 p-0.5 sm:p-1 rounded-md border border-orange-200 text-[6px] sm:text-[8px] font-black text-orange-800 text-center items-center justify-center w-12 sm:w-16 h-6 sm:h-8 opacity-80 shadow">
                     LOGO<br>ON VAC.
                 </div>
             </div>
@@ -109,40 +137,41 @@
 
     <!-- PANTALLA DE INICIO -->
     <div id="startScreen" class="overlay">
-        <div class="bg-white/10 p-6 rounded-3xl border border-white/20 text-center max-w-md mx-4 shadow-2xl floating">
-            <h1 class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-blue-500 mb-2">Guardianes del Planeta</h1>
-            <p class="text-blue-200 font-bold mb-6 text-sm">Torneo de 7 Minutos</p>
+        <div class="bg-white/10 p-4 sm:p-6 rounded-3xl border border-white/20 text-center max-w-md mx-4 shadow-2xl floating overflow-y-auto max-h-[90vh]">
+            <h1 class="text-3xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-blue-500 mb-2">Guardianes del Planeta</h1>
+            <p class="text-blue-200 font-bold mb-4 sm:mb-6 text-xs sm:text-sm">Torneo de 7 Minutos</p>
             
-            <div class="grid grid-cols-2 gap-4 text-left mb-6 bg-slate-900/50 p-4 rounded-xl">
+            <div class="grid grid-cols-2 gap-2 sm:gap-4 text-left mb-4 sm:mb-6 bg-slate-900/50 p-3 sm:p-4 rounded-xl">
                 <div>
-                    <p class="text-red-400 font-black text-sm mb-2 border-b border-red-400/30 pb-1">💥 DESTRUYE</p>
-                    <p class="text-xs text-white mb-1 flex items-center gap-1"><img src="Plastico.png" class="w-4 h-4 object-contain inline" onerror="this.outerHTML='🛢️'"> Plástico</p>
-                    <p class="text-xs text-white mb-1 flex items-center gap-1"><img src="Carton.png" class="w-4 h-4 object-contain inline" onerror="this.outerHTML='🥡'"> Cartón</p>
-                     <p class="text-xs text-white mb-1 flex items-center gap-1"><img src="colilla.png" class="w-4 h-4 object-contain inline" onerror="this.outerHTML='🥡'"> Cartón</p>
-                    <p class="text-xs text-white mb-1 flex items-center gap-1"><img src="Tetrapack.png" class="w-4 h-4 object-contain inline" onerror="this.outerHTML='🥡'"> Tetra pak</p>
-                    <p class="text-xs text-white mb-1 flex items-center gap-1"><img src="Vidrio.png" class="w-4 h-4 object-contain inline" onerror="this.outerHTML='🥡'"> Vidrio</p>
-                    <p class="text-xs text-white mb-1 flex items-center gap-1"><img src="Metal.png" class="w-4 h-4 object-contain inline" onerror="this.outerHTML='🥡'"> Latas</p>
+                    <p class="text-red-400 font-black text-xs sm:text-sm mb-2 border-b border-red-400/30 pb-1">💥 DESTRUYE</p>
+                    <p class="text-[10px] sm:text-xs text-white mb-1 flex items-center gap-1"><img src="Plastico.png" class="w-3 h-3 sm:w-4 sm:h-4 object-contain inline" onerror="this.outerHTML='🛢️'"> Plástico</p>
+                    <p class="text-[10px] sm:text-xs text-white mb-1 flex items-center gap-1"><img src="Carton.png" class="w-3 h-3 sm:w-4 sm:h-4 object-contain inline" onerror="this.outerHTML='🥡'"> Cartón</p>
+                    <p class="text-[10px] sm:text-xs text-white mb-1 flex items-center gap-1"><img src="colilla.png" class="w-3 h-3 sm:w-4 sm:h-4 object-contain inline" onerror="this.outerHTML='🚬'"> Colillas</p>
+                    <p class="text-[10px] sm:text-xs text-white mb-1 flex items-center gap-1"><img src="Tetrapack.png" class="w-3 h-3 sm:w-4 sm:h-4 object-contain inline" onerror="this.outerHTML='🥡'"> Tetra pak</p>
+                    <p class="text-[10px] sm:text-xs text-white mb-1 flex items-center gap-1"><img src="Vidrio.png" class="w-3 h-3 sm:w-4 sm:h-4 object-contain inline" onerror="this.outerHTML='🥡'"> Vidrio</p>
+                    <p class="text-[10px] sm:text-xs text-white mb-1 flex items-center gap-1"><img src="Metal.png" class="w-3 h-3 sm:w-4 sm:h-4 object-contain inline" onerror="this.outerHTML='🥡'"> Latas</p>
                 </div>
                 <div>
-                    <p class="text-green-400 font-black text-sm mb-2 border-b border-green-400/30 pb-1">🛡️ ATRAPA</p>
-                    <p class="text-xs text-white mb-1 flex items-center gap-1"><img src="reciclar.png" class="w-4 h-4 object-contain inline" onerror="this.outerHTML='💊'"> Reciclaje</p>
-                    <p class="text-[10px] text-yellow-300 font-bold border-t border-green-400/30 pt-1 mt-1 flex items-center gap-1">
-                        <img src="logo-on-vacation.png" class="w-10 h-10 object-contain inline" onerror="this.outerHTML='🌴'"> On Vacation (+1 ❤️)
+                    <p class="text-green-400 font-black text-xs sm:text-sm mb-2 border-b border-green-400/30 pb-1">🛡️ ATRAPA</p>
+                    <p class="text-[10px] sm:text-xs text-white mb-1 flex items-center gap-1"><img src="reciclar.png" class="w-3 h-3 sm:w-4 sm:h-4 object-contain inline" onerror="this.outerHTML='💊'"> Reciclaje</p>
+                    <p class="text-[9px] sm:text-[10px] text-yellow-300 font-bold border-t border-green-400/30 pt-1 mt-1 flex flex-col sm:flex-row items-start sm:items-center gap-1">
+                        <img src="logo-on-vacation.png" class="w-8 h-8 sm:w-10 sm:h-10 object-contain inline" onerror="this.outerHTML='🌴'"> 
+                        <span>On Vacation<br>(+1 ❤️)</span>
                     </p>
                 </div>
             </div>
 
-            <div class="bg-slate-800 p-3 rounded-lg border border-slate-600 mb-6">
-                <p class="text-sm text-yellow-400 font-bold mb-1">⚠️ CÓMO JUGAR:</p>
-                <p class="text-xs text-slate-300"><strong>Mover:</strong> Arrastra dedo o ratón.</p>
-                <p class="text-xs text-slate-300 mb-1"><strong>Disparar:</strong> Toca la pantalla o tecla ESPACIO.</p>
-                <p class="text-xs text-red-300 border-t border-slate-600 pt-1 mt-1"><strong>☠️ ¡Ojo!</strong> Si la basura tóxica toca el fondo, pierdes media vida.</p>
+            <div class="bg-slate-800 p-3 rounded-lg border border-slate-600 mb-4 sm:mb-6">
+                <p class="text-[10px] sm:text-sm text-yellow-400 font-bold mb-1">⚠️ CÓMO JUGAR:</p>
+                <p class="text-[9px] sm:text-xs text-slate-300"><strong>Mover:</strong> Arrastra dedo o ratón.</p>
+                <p class="text-[9px] sm:text-xs text-slate-300 mb-1"><strong>Disparar:</strong> Toca la pantalla o botón rojo.</p>
+                <p class="text-[9px] sm:text-xs text-red-300 border-t border-slate-600 pt-1 mt-1"><strong>☠️ ¡Ojo!</strong> Si la basura tóxica toca el fondo, pierdes media vida.</p>
             </div>
 
-            <p id="nameError" class="text-red-400 font-black text-sm mb-2 hidden animate-bounce">¡Debes ingresar tu nombre o apodo para jugar!</p>
-            <input id="playerName" type="text" placeholder="Tu Nombre o Apodo" class="w-full p-3 rounded-lg mb-4 text-center font-bold text-slate-800 focus:outline-none focus:ring-4 focus:ring-teal-500" maxlength="15">
+            <p id="nameError" class="text-red-400 font-black text-xs sm:text-sm mb-2 hidden animate-bounce">¡Debes ingresar tu nombre o apodo para jugar!</p>
+            <input id="playerName" type="text" placeholder="Tu Nombre o Apodo" class="w-full p-2 sm:p-3 rounded-lg mb-4 text-center font-bold text-slate-800 focus:outline-none focus:ring-4 focus:ring-teal-500" maxlength="15">
             
-            <button onclick="startGame()" class="w-full bg-teal-500 hover:bg-teal-400 text-slate-900 font-black text-xl py-4 rounded-xl pulse shadow-[0_0_15px_rgba(20,184,166,0.5)]">
+            <button onclick="startGame()" class="w-full bg-teal-500 hover:bg-teal-400 text-slate-900 font-black text-lg sm:text-xl py-3 sm:py-4 rounded-xl pulse shadow-[0_0_15px_rgba(20,184,166,0.5)]">
                 ¡INICIAR MISIÓN! 🚀
             </button>
         </div>
@@ -150,33 +179,33 @@
 
     <!-- PANTALLA FIN DEL JUEGO -->
     <div id="gameOverScreen" class="overlay hidden">
-        <div class="bg-slate-900 p-6 rounded-3xl border-4 border-teal-500 text-center w-full max-w-sm mx-4 shadow-[0_0_30px_rgba(20,184,166,0.3)] flex flex-col max-h-[90vh]">
-            <h2 id="gameOverTitle" class="text-2xl font-black text-white mb-1">TIEMPO AGOTADO</h2>
+        <div class="bg-slate-900 p-4 sm:p-6 rounded-3xl border-4 border-teal-500 text-center w-full max-w-sm mx-4 shadow-[0_0_30px_rgba(20,184,166,0.3)] flex flex-col max-h-[90vh]">
+            <h2 id="gameOverTitle" class="text-xl sm:text-2xl font-black text-white mb-1">TIEMPO AGOTADO</h2>
             
-            <div class="bg-slate-800 p-3 rounded-xl mb-4 mt-2 border border-slate-700">
-                <p class="text-xs text-slate-400 font-bold uppercase">Gestor</p>
-                <p id="finalName" class="text-xl font-black text-teal-400 mb-1">---</p>
-                <p class="text-xs text-slate-400 font-bold uppercase mt-2">Puntaje Final</p>
-                <p id="finalScore" class="text-4xl font-black text-yellow-400">0</p>
+            <div class="bg-slate-800 p-2 sm:p-3 rounded-xl mb-3 sm:mb-4 mt-2 border border-slate-700">
+                <p class="text-[10px] sm:text-xs text-slate-400 font-bold uppercase">Gestor</p>
+                <p id="finalName" class="text-lg sm:text-xl font-black text-teal-400 mb-1">---</p>
+                <p class="text-[10px] sm:text-xs text-slate-400 font-bold uppercase mt-2">Puntaje Final</p>
+                <p id="finalScore" class="text-3xl sm:text-4xl font-black text-yellow-400">0</p>
 
                 <!-- IMPACTO AMBIENTAL -->
                 <div class="border-t border-slate-600 pt-2 mt-2">
-                    <p id="envImpact" class="text-sm font-black text-cyan-400 pulse">💧 Salvaste 0 Litros</p>
-                    <p class="text-[10px] text-cyan-200">de agua marina de la contaminación</p>
+                    <p id="envImpact" class="text-xs sm:text-sm font-black text-cyan-400 pulse">💧 Salvaste 0 Litros</p>
+                    <p class="text-[8px] sm:text-[10px] text-cyan-200">de agua marina de la contaminación</p>
                 </div>
             </div>
 
             <!-- TABLA DE POSICIONES (RANKING SUPABASE) -->
-            <div class="bg-slate-950 p-3 rounded-xl mb-4 border border-slate-800 flex-1 overflow-hidden flex flex-col">
-                <h3 class="text-sm font-black text-white mb-2 flex items-center justify-center gap-2">
+            <div class="bg-slate-950 p-2 sm:p-3 rounded-xl mb-3 sm:mb-4 border border-slate-800 flex-1 overflow-hidden flex flex-col">
+                <h3 class="text-xs sm:text-sm font-black text-white mb-2 flex items-center justify-center gap-2">
                     🏆 TOP 3 GESTORES 🏆
                 </h3>
                 <div id="leaderboardList" class="flex-1 overflow-y-auto pr-1">
-                    <p class="text-xs text-slate-400 my-4 text-center animate-pulse">Cargando puntajes en vivo...</p>
+                    <p class="text-[10px] sm:text-xs text-slate-400 my-4 text-center animate-pulse">Cargando puntajes en vivo...</p>
                 </div>
             </div>
 
-            <button onclick="location.reload()" class="w-full bg-white text-slate-900 hover:bg-slate-200 font-black text-lg py-3 rounded-xl pointer-events-auto flex-shrink-0">
+            <button onclick="location.reload()" class="w-full bg-white text-slate-900 hover:bg-slate-200 font-black text-base sm:text-lg py-2 sm:py-3 rounded-xl pointer-events-auto flex-shrink-0">
                 Jugar de Nuevo
             </button>
         </div>
@@ -207,8 +236,9 @@
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || ('ontouchstart' in window);
         
         function resize() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+            // Se usa clientWidth/Height para respetar el tamaño exacto sin barras de navegación en celulares
+            canvas.width = document.body.clientWidth;
+            canvas.height = document.body.clientHeight;
         }
         window.addEventListener('resize', resize);
         resize();
