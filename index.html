@@ -16,15 +16,14 @@
             margin: 0; 
             padding: 0;
             width: 100vw;
-            height: 100dvh; /* Altura dinámica exacta para móviles */
-            position: relative; /* Asegura que el botón de fuego se ancle correctamente */
+            height: 100dvh; 
+            position: relative; 
             overflow: hidden; 
-            /* FONDO DE MAR (Degradado azul océano) */
             background: linear-gradient(180deg, #0284c7 0%, #0369a1 40%, #082f49 100%); 
             touch-action: none; 
             font-family: 'Inter', sans-serif; 
             user-select: none; 
-            -webkit-user-select: none; /* Previene selección de texto en móviles */
+            -webkit-user-select: none; 
         }
         #gameCanvas { display: block; width: 100%; height: 100%; cursor: crosshair; }
         
@@ -43,7 +42,6 @@
             top: 0; 
             left: 0; 
             width: 100%; 
-            /* El padding usa safe-area para esquivar la cámara de los celulares modernos */
             padding: max(15px, env(safe-area-inset-top)) max(15px, env(safe-area-inset-right)) 10px max(15px, env(safe-area-inset-left)); 
             display: flex; 
             justify-content: space-between; 
@@ -53,12 +51,11 @@
             box-sizing: border-box;
         }
         
-        /* BOTÓN DE DISPARO MÓVIL RESPONSIVO */
         #fireButton {
             position: absolute;
             bottom: max(30px, env(safe-area-inset-bottom));
             right: max(30px, env(safe-area-inset-right));
-            width: 75px;  /* Más pequeño para celular */
+            width: 75px;  
             height: 75px;
             border-radius: 50%;
             background: radial-gradient(circle, #ef4444 0%, #b91c1c 100%);
@@ -82,23 +79,16 @@
         #fireButton.hidden { display: none !important; }
 
         @media (min-width: 768px) {
-            #fireButton {
-                width: 100px;
-                height: 100px;
-                bottom: 40px;
-                right: 40px;
-                font-size: 40px;
-            }
+            #fireButton { width: 100px; height: 100px; bottom: 40px; right: 40px; font-size: 40px; }
         }
         
-        /* Scrollbar para el leaderboard */
         #leaderboardList::-webkit-scrollbar { width: 4px; }
         #leaderboardList::-webkit-scrollbar-thumb { background: #38bdf8; border-radius: 4px; }
     </style>
 </head>
 <body>
 
-    <!-- UI DEL JUEGO (Puntaje, Vidas, Tiempo, Logos) Ajustada para celulares -->
+    <!-- UI DEL JUEGO -->
     <div id="ui-bar">
         <div class="flex flex-col gap-1 sm:gap-2">
             <div class="bg-blue-900/80 border border-blue-400 text-white px-2 py-1 sm:px-3 sm:py-1 rounded-lg text-[10px] sm:text-sm font-black tracking-widest shadow-lg">
@@ -114,16 +104,13 @@
                 ⏱️ <span id="timeDisplay" class="text-teal-400">07:00</span>
             </div>
             
-            <!-- Logos Responsivos -->
             <div class="flex gap-1 sm:gap-2 mt-1 pointer-events-auto">
-                <!-- Imagen real del logo de Punto Azul -->
                 <img src="logo-punto-azul.png" id="imgLogoPuntoAzul" onerror="this.style.display='none'; document.getElementById('cssLogoPuntoAzul').style.display='flex';" class="h-6 sm:h-8 object-contain bg-white/90 p-0.5 sm:p-1 rounded shadow" alt="Punto Azul">
                 <div id="cssLogoPuntoAzul" style="display: none;" class="bg-white/95 px-1 sm:px-2 py-0.5 sm:py-1 rounded-md border-b-2 border-blue-300 items-center justify-center gap-1 shadow-md">
                     <div class="w-2 h-2 sm:w-3 sm:h-3 bg-[#004aad] rounded-full shadow-inner"></div>
                     <span style="font-family: Calibri, 'Times New Roman', sans-serif;" class="text-[8px] sm:text-[11px] font-black text-[#004aad] leading-none tracking-wide">PUNTO<br>AZUL</span>
                 </div>
                 
-                <!-- Imagen real del logo de On Vacation -->
                 <img src="logo-on-vacation.png" id="imgLogoOnVac" onerror="this.style.display='none'; document.getElementById('cssLogoOnVac').style.display='flex';" class="h-6 sm:h-8 object-contain bg-white/90 p-0.5 sm:p-1 rounded shadow" alt="On Vacation">
                 <div id="cssLogoOnVac" style="display: none;" class="bg-orange-100 p-0.5 sm:p-1 rounded-md border border-orange-200 text-[6px] sm:text-[8px] font-black text-orange-800 text-center items-center justify-center w-12 sm:w-16 h-6 sm:h-8 opacity-80 shadow">
                     LOGO<br>ON VAC.
@@ -138,12 +125,18 @@
     <!-- PANTALLA DE INICIO -->
     <div id="startScreen" class="overlay">
         <div class="bg-white/10 p-4 sm:p-6 rounded-3xl border border-white/20 text-center max-w-md mx-4 shadow-2xl floating overflow-y-auto max-h-[90vh]">
-            <h1 class="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-blue-500 mb-2">Guardianes del Planeta</h1>
-            <p class="text-blue-200 font-bold mb-4 sm:mb-6 text-xs sm:text-sm">Torneo de 7 Minutos</p>
+            <h1 class="text-3xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-blue-500 mb-2">Guardianes del Planeta</h1>
+            <p class="text-blue-200 font-bold mb-2 sm:mb-4 text-xs sm:text-sm">Torneo de 7 Minutos</p>
+            
+            <!-- CONTADOR DE INTENTOS VISUAL -->
+            <div id="attemptsContainer" class="bg-indigo-900/80 border border-indigo-400 p-2 rounded-lg mb-4 inline-block">
+                <p class="text-indigo-200 text-[10px] sm:text-xs font-bold uppercase">Intentos Restantes</p>
+                <p id="attemptsDisplay" class="text-white font-black text-lg sm:text-xl">3 / 3</p>
+            </div>
             
             <div class="grid grid-cols-2 gap-2 sm:gap-4 text-left mb-4 sm:mb-6 bg-slate-900/50 p-3 sm:p-4 rounded-xl">
                 <div>
-                    <p class="text-red-400 font-black text-xs sm:text-sm mb-2 border-b border-red-400/30 pb-1">💥 APROVECHA</p>
+                    <p class="text-red-400 font-black text-xs sm:text-sm mb-2 border-b border-red-400/30 pb-1">💥 DESTRUYE</p>
                     <p class="text-[10px] sm:text-xs text-white mb-1 flex items-center gap-1"><img src="Plastico.png" class="w-3 h-3 sm:w-4 sm:h-4 object-contain inline" onerror="this.outerHTML='🛢️'"> Plástico</p>
                     <p class="text-[10px] sm:text-xs text-white mb-1 flex items-center gap-1"><img src="Carton.png" class="w-3 h-3 sm:w-4 sm:h-4 object-contain inline" onerror="this.outerHTML='🥡'"> Cartón</p>
                     <p class="text-[10px] sm:text-xs text-white mb-1 flex items-center gap-1"><img src="colilla.png" class="w-3 h-3 sm:w-4 sm:h-4 object-contain inline" onerror="this.outerHTML='🚬'"> Colillas</p>
@@ -161,19 +154,16 @@
                 </div>
             </div>
 
-            <div class="bg-slate-800 p-3 rounded-lg border border-slate-600 mb-4 sm:mb-6">
-                <p class="text-[10px] sm:text-sm text-yellow-400 font-bold mb-1">⚠️ CÓMO JUGAR:</p>
-                <p class="text-[9px] sm:text-xs text-slate-300"><strong>Mover:</strong> Arrastra dedo o ratón.</p>
-                <p class="text-[9px] sm:text-xs text-slate-300 mb-1"><strong>Disparar:</strong> Toca la pantalla o botón rojo.</p>
-                <p class="text-[9px] sm:text-xs text-red-300 border-t border-slate-600 pt-1 mt-1"><strong>☠️ ¡Ojo!</strong> Si la basura tóxica toca el fondo, pierdes media vida.</p>
-            </div>
-
             <p id="nameError" class="text-red-400 font-black text-xs sm:text-sm mb-2 hidden animate-bounce">¡Debes ingresar tu nombre o apodo para jugar!</p>
             <input id="playerName" type="text" placeholder="Tu Nombre o Apodo" class="w-full p-2 sm:p-3 rounded-lg mb-4 text-center font-bold text-slate-800 focus:outline-none focus:ring-4 focus:ring-teal-500" maxlength="15">
             
-            <button onclick="startGame()" class="w-full bg-teal-500 hover:bg-teal-400 text-slate-900 font-black text-lg sm:text-xl py-3 sm:py-4 rounded-xl pulse shadow-[0_0_15px_rgba(20,184,166,0.5)]">
+            <button id="btnStart" onclick="startGame()" class="w-full bg-teal-500 hover:bg-teal-400 text-slate-900 font-black text-lg sm:text-xl py-3 sm:py-4 rounded-xl pulse shadow-[0_0_15px_rgba(20,184,166,0.5)]">
                 ¡INICIAR MISIÓN! 🚀
             </button>
+            
+            <p id="noAttemptsMessage" class="hidden text-red-400 font-black text-sm mt-4 p-3 bg-red-900/50 rounded-lg border border-red-500">
+                Has alcanzado el límite máximo de intentos para este torneo. ¡Gracias por participar!
+            </p>
         </div>
     </div>
 
@@ -188,7 +178,6 @@
                 <p class="text-[10px] sm:text-xs text-slate-400 font-bold uppercase mt-2">Puntaje Final</p>
                 <p id="finalScore" class="text-3xl sm:text-4xl font-black text-yellow-400">0</p>
 
-                <!-- IMPACTO AMBIENTAL -->
                 <div class="border-t border-slate-600 pt-2 mt-2">
                     <p id="envImpact" class="text-xs sm:text-sm font-black text-cyan-400 pulse">💧 Salvaste 0 Litros</p>
                     <p class="text-[8px] sm:text-[10px] text-cyan-200">de agua marina de la contaminación</p>
@@ -206,7 +195,7 @@
             </div>
 
             <button onclick="location.reload()" class="w-full bg-white text-slate-900 hover:bg-slate-200 font-black text-base sm:text-lg py-2 sm:py-3 rounded-xl pointer-events-auto flex-shrink-0">
-                Jugar de Nuevo
+                Continuar
             </button>
         </div>
     </div>
@@ -217,26 +206,50 @@
     <script>
         const supabaseUrl = 'https://jbbvrjlcjwbtcmjmkwyn.supabase.co';
         const supabaseKey = 'sb_publishable_jSIurRKNRpujkD4Sy8MUNQ_aJ9S0Rvw';
-        
         let db = null;
-        
-        // Bloque Try-Catch para asegurar que el juego funcione aunque Supabase falle o no esté configurado
         try {
             if (supabaseUrl.startsWith('https://') && !supabaseUrl.includes('REEMPLAZA') && window.supabase) {
                 db = window.supabase.createClient(supabaseUrl, supabaseKey);
             }
-        } catch (error) {
-            console.warn("Supabase no se cargó correctamente, el juego funcionará en modo offline.");
+        } catch (error) { console.warn("Modo offline activado."); }
+
+        // =========================================================
+        // --- SISTEMA DE INTENTOS (ANTI-TRAMPAS BLINDADO) ---
+        // =========================================================
+        const MAX_ATTEMPTS = 3;
+        let currentAttempts = parseInt(localStorage.getItem('defensorAttempts')) || 0;
+        
+        function updateAttemptsUI() {
+            let attemptsLeft = MAX_ATTEMPTS - currentAttempts;
+            if(attemptsLeft < 0) attemptsLeft = 0;
+            
+            const displayEl = document.getElementById('attemptsDisplay');
+            if (displayEl) displayEl.innerText = `${attemptsLeft} / ${MAX_ATTEMPTS}`;
+            
+            if (currentAttempts >= MAX_ATTEMPTS) {
+                // Forzar ocultamiento del botón de inicio
+                const btn = document.getElementById('btnStart');
+                if (btn) btn.style.display = 'none'; 
+                
+                // Mostrar mensaje de bloqueo
+                const msg = document.getElementById('noAttemptsMessage');
+                if (msg) msg.classList.remove('hidden');
+                
+                // Bloquear input
+                const input = document.getElementById('playerName');
+                if (input) input.disabled = true;
+            }
         }
+        
+        // Ejecutar inmediatamente (sin esperar a nada)
+        updateAttemptsUI();
+        // =========================================================
 
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        
-        // Detectar dispositivo
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || ('ontouchstart' in window);
         
         function resize() {
-            // Se usa clientWidth/Height para respetar el tamaño exacto sin barras de navegación en celulares
             canvas.width = document.body.clientWidth;
             canvas.height = document.body.clientHeight;
         }
@@ -245,71 +258,42 @@
 
         let gameRunning = false;
         let score = 0;
-        let lives = 3.0; // Decimales para medias vidas
-        let timeLeft = 420; // 7 minutos
+        let lives = 3.0; 
+        let timeLeft = 420; 
         let timerInterval;
         let difficultyMultiplier = 1;
         let playerName = '';
         let lastFireTime = 0;
         
-        // Control de FPS 
         let lastFrameTime = performance.now();
         const targetFPS = 60;
         const frameDelay = 1000 / targetFPS;
 
-        let player;
-        let bullets = [];
-        let enemies = [];
-        let collectibles = []; // Arrays ahora contendrá coleccionables normales y el OnVacation
-        let particles = [];
-        let bubbles = [];
-        let floatingTexts = [];
+        let player, bullets = [], enemies = [], collectibles = [], particles = [], bubbles = [], floatingTexts = [];
 
-        // Emojis de respaldo por si las imágenes fallan
         const ENEMY_TYPES = ['🛢️', '🥡', '🚬'];
         const COLLECTIBLE_TYPES = ['💊', '📦', '🧴'];
 
-        // Precargar Imágenes de Residuos
         const enemyImageSrcs = ['Plastico.png', 'Papel.png', 'Carton.png','Tetrapack.png','Vidrio.png','Metal.png','colilla.png'];
         const collectibleImageSrcs = ['reciclar.png'];
         
-        const enemyImages = enemyImageSrcs.map(src => {
-            const img = new Image();
-            img.src = src;
-            return img;
-        });
-
-        const collectibleImages = collectibleImageSrcs.map(src => {
-            const img = new Image();
-            img.src = src;
-            return img;
-        });
+        const enemyImages = enemyImageSrcs.map(src => { const img = new Image(); img.src = src; return img; });
+        const collectibleImages = collectibleImageSrcs.map(src => { const img = new Image(); img.src = src; return img; });
 
         class Player {
             constructor() {
-                this.width = 65;
-                this.height = 65;
-                this.x = canvas.width / 2;
-                this.y = canvas.height - 100;
+                this.width = 65; this.height = 65;
+                this.x = canvas.width / 2; this.y = canvas.height - 100;
                 this.targetX = this.x;
-                
-                this.image = new Image();
-                this.image.src = 'Nave.png';
+                this.image = new Image(); this.image.src = 'Nave.png';
                 this.imageLoaded = false;
-                
-                this.image.onload = () => {
-                    this.imageLoaded = true;
-                };
+                this.image.onload = () => { this.imageLoaded = true; };
             }
             draw() {
-                // Si la imagen cargó con éxito, dibujarla. Si no, dibujar el emoji.
                 if (this.imageLoaded && this.image.naturalHeight !== 0) {
                     ctx.drawImage(this.image, this.x - this.width / 2, this.y - this.height / 2, this.width, this.height);
                 } else {
-                    ctx.font = "40px Arial";
-                    ctx.textAlign = "center";
-                    ctx.textBaseline = "middle";
-                    ctx.fillStyle = "#ffffff";
+                    ctx.font = "40px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillStyle = "#ffffff";
                     ctx.fillText("🛸", this.x, this.y);
                 }
             }
@@ -322,31 +306,19 @@
 
         class Bullet {
             constructor(x, y) {
-                this.x = x;
-                this.y = y;
-                this.width = 4;
-                this.height = 20;
-                this.speed = 12; 
-                this.markedForDeletion = false;
+                this.x = x; this.y = y; this.width = 4; this.height = 20; this.speed = 12; this.markedForDeletion = false;
             }
             draw() {
-                ctx.fillStyle = '#2dd4bf';
-                ctx.shadowColor = '#2dd4bf';
-                ctx.shadowBlur = 10;
-                ctx.fillRect(this.x - this.width/2, this.y, this.width, this.height);
-                ctx.shadowBlur = 0;
+                ctx.fillStyle = '#2dd4bf'; ctx.shadowColor = '#2dd4bf'; ctx.shadowBlur = 10;
+                ctx.fillRect(this.x - this.width/2, this.y, this.width, this.height); ctx.shadowBlur = 0;
             }
-            update() {
-                this.y -= this.speed;
-                if (this.y < -50) this.markedForDeletion = true;
-            }
+            update() { this.y -= this.speed; if (this.y < -50) this.markedForDeletion = true; }
         }
 
         class FallingObject {
-            constructor(type) { // type puede ser 'enemy', 'collectible' o 'onvacation'
-                this.type = type;
-                this.size = 40; 
-                if(type === 'onvacation') this.size = 50; // Un poco más grande para el logo
+            constructor(type) { 
+                this.type = type; this.size = 40; 
+                if(type === 'onvacation') this.size = 50; 
 
                 this.x = Math.random() * (canvas.width - this.size * 2) + this.size;
                 this.y = -50;
@@ -356,234 +328,124 @@
                 this.wobble = Math.random() * Math.PI * 2;
                 this.wobbleSpeed = Math.random() * 0.03 + 0.01;
 
-                // Asignar Imagen y Emoji según el tipo
                 if (type === 'enemy') {
                     const idx = Math.floor(Math.random() * enemyImages.length);
-                    this.image = enemyImages[idx];
-                    this.emoji = ENEMY_TYPES[idx % ENEMY_TYPES.length];
+                    this.image = enemyImages[idx]; this.emoji = ENEMY_TYPES[idx % ENEMY_TYPES.length];
                 } else if (type === 'collectible') {
                     const idx = Math.floor(Math.random() * collectibleImages.length);
-                    this.image = collectibleImages[idx];
-                    this.emoji = COLLECTIBLE_TYPES[idx % COLLECTIBLE_TYPES.length];
+                    this.image = collectibleImages[idx]; this.emoji = COLLECTIBLE_TYPES[idx % COLLECTIBLE_TYPES.length];
                 } else if (type === 'onvacation') {
-                    this.image = new Image();
-                    this.image.src = 'logo-on-vacation.png';
-                    this.emoji = '🌴'; // Respaldo si no carga la imagen
+                    this.image = new Image(); this.image.src = 'logo-on-vacation.png'; this.emoji = '🌴'; 
                 }
             }
             draw() {
                 const xOffset = Math.sin(this.wobble) * 20;
-                
-                // Si la imagen cargó correctamente, se dibuja
                 if (this.image && this.image.complete && this.image.naturalHeight !== 0) {
                     ctx.drawImage(this.image, this.x + xOffset - this.size/2, this.y - this.size/2, this.size, this.size);
                 } else {
-                    // Respaldo de texto/emoji si falla la carga
-                    ctx.font = "35px Arial";
-                    ctx.textAlign = "center";
-                    ctx.textBaseline = "middle";
-                    ctx.fillStyle = "#ffffff";
+                    ctx.font = "35px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillStyle = "#ffffff";
                     ctx.fillText(this.emoji, this.x + xOffset, this.y);
                 }
             }
             update() {
-                this.y += this.speed;
-                this.wobble += this.wobbleSpeed;
-                
+                this.y += this.speed; this.wobble += this.wobbleSpeed;
                 if (this.y > canvas.height + 50) {
                     this.markedForDeletion = true;
-                    // PENALIZACIÓN DE MEDIA VIDA SOLO PARA ENEMIGOS
-                    if (this.isEnemy) {
-                        addScore(-5);
-                        loseLife(0.5); 
-                        createFloatingText("-0.5 ❤️", this.x, canvas.height - 30, "#ef4444");
-                    }
+                    if (this.isEnemy) { addScore(-5); loseLife(0.5); createFloatingText("-0.5 ❤️", this.x, canvas.height - 30, "#ef4444"); }
                 }
             }
         }
 
         class Particle {
             constructor(x, y, color) {
-                this.x = x;
-                this.y = y;
-                this.size = Math.random() * 5 + 2;
-                this.speedX = Math.random() * 6 - 3;
-                this.speedY = Math.random() * 6 - 3;
-                this.color = color;
-                this.life = 1.0;
-                this.markedForDeletion = false;
+                this.x = x; this.y = y; this.size = Math.random() * 5 + 2;
+                this.speedX = Math.random() * 6 - 3; this.speedY = Math.random() * 6 - 3;
+                this.color = color; this.life = 1.0; this.markedForDeletion = false;
             }
             draw() {
-                ctx.globalAlpha = this.life;
-                ctx.fillStyle = this.color;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.globalAlpha = 1.0;
+                ctx.globalAlpha = this.life; ctx.fillStyle = this.color; ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1.0;
             }
-            update() {
-                this.x += this.speedX;
-                this.y += this.speedY;
-                this.life -= 0.05;
-                if (this.life <= 0) this.markedForDeletion = true;
-            }
+            update() { this.x += this.speedX; this.y += this.speedY; this.life -= 0.05; if (this.life <= 0) this.markedForDeletion = true; }
         }
 
         class FloatingText {
             constructor(text, x, y, color) {
-                this.text = text;
-                this.x = x;
-                this.y = y;
-                this.color = color;
-                this.life = 1.0;
-                this.markedForDeletion = false;
+                this.text = text; this.x = x; this.y = y; this.color = color; this.life = 1.0; this.markedForDeletion = false;
             }
             draw() {
-                ctx.globalAlpha = this.life;
-                ctx.fillStyle = this.color;
-                ctx.font = "bold 20px Inter, sans-serif";
-                ctx.textAlign = "center";
-                ctx.fillText(this.text, this.x, this.y);
-                ctx.globalAlpha = 1.0;
+                ctx.globalAlpha = this.life; ctx.fillStyle = this.color; ctx.font = "bold 20px Inter, sans-serif";
+                ctx.textAlign = "center"; ctx.fillText(this.text, this.x, this.y); ctx.globalAlpha = 1.0;
             }
-            update() {
-                this.y -= 2;
-                this.life -= 0.02;
-                if (this.life <= 0) this.markedForDeletion = true;
-            }
+            update() { this.y -= 2; this.life -= 0.02; if (this.life <= 0) this.markedForDeletion = true; }
         }
 
         class Bubble {
             constructor() {
-                this.x = Math.random() * canvas.width;
-                this.y = canvas.height + Math.random() * 100;
-                this.size = Math.random() * 4 + 1;
-                this.speed = Math.random() * 2 + 1;
+                this.x = Math.random() * canvas.width; this.y = canvas.height + Math.random() * 100;
+                this.size = Math.random() * 4 + 1; this.speed = Math.random() * 2 + 1;
             }
             draw() {
-                ctx.fillStyle = "rgba(255, 255, 255, 0.2)"; 
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
+                ctx.fillStyle = "rgba(255, 255, 255, 0.2)"; ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
             }
             update() {
                 this.y -= this.speed;
-                if (this.y < -10) {
-                    this.y = canvas.height + 10;
-                    this.x = Math.random() * canvas.width;
-                }
+                if (this.y < -10) { this.y = canvas.height + 10; this.x = Math.random() * canvas.width; }
             }
         }
 
-        function createExplosion(x, y, color) {
-            for (let i = 0; i < 15; i++) particles.push(new Particle(x, y, color));
-        }
-
-        function createFloatingText(text, x, y, color) {
-            floatingTexts.push(new FloatingText(text, x, y, color));
-        }
+        function createExplosion(x, y, color) { for (let i = 0; i < 15; i++) particles.push(new Particle(x, y, color)); }
+        function createFloatingText(text, x, y, color) { floatingTexts.push(new FloatingText(text, x, y, color)); }
 
         function updateUI() {
             document.getElementById('scoreDisplay').innerText = score;
-            let hearts = "";
-            let fullHearts = Math.floor(lives);
-            let hasHalfHeart = (lives % 1) >= 0.5;
-            
+            let hearts = ""; let fullHearts = Math.floor(lives); let hasHalfHeart = (lives % 1) >= 0.5;
             for(let i = 0; i < fullHearts; i++) hearts += "❤️";
             if (hasHalfHeart) hearts += "💔";
-            
             document.getElementById('livesDisplay').innerText = hearts;
         }
 
-        function addScore(amount) {
-            score += amount;
-            if (score < 0) score = 0;
-            updateUI();
-        }
+        function addScore(amount) { score += amount; if (score < 0) score = 0; updateUI(); }
 
         function loseLife(amount) {
-            lives -= amount;
-            if (lives <= 0) lives = 0;
-            
-            updateUI();
-            
+            lives -= amount; if (lives <= 0) lives = 0; updateUI();
             document.getElementById('ui-bar').classList.add('bg-red-500/50');
             setTimeout(() => document.getElementById('ui-bar').classList.remove('bg-red-500/50'), 200);
-
-            if (lives <= 0) {
-                endGame("TOXICIDAD CRÍTICA");
-            }
+            if (lives <= 0) endGame("TOXICIDAD CRÍTICA");
         }
 
         function formatTime(seconds) {
-            const m = Math.floor(seconds / 60);
-            const s = seconds % 60;
+            const m = Math.floor(seconds / 60); const s = seconds % 60;
             return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
         }
 
         function fireBullet() {
-            if (!gameRunning) return;
-            const timestamp = performance.now();
-            if (timestamp - lastFireTime > 150) {
-                bullets.push(new Bullet(player.x, player.y - 20));
-                lastFireTime = timestamp;
-            }
+            if (!gameRunning) return; const timestamp = performance.now();
+            if (timestamp - lastFireTime > 150) { bullets.push(new Bullet(player.x, player.y - 20)); lastFireTime = timestamp; }
         }
 
-        window.addEventListener('mousemove', (e) => {
-            if (!gameRunning) return;
-            player.targetX = e.clientX;
-        });
-
+        window.addEventListener('mousemove', (e) => { if (!gameRunning) return; player.targetX = e.clientX; });
         window.addEventListener('mousedown', (e) => {
             if (!gameRunning) return;
-            if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT' && e.target.id !== 'fireButton') {
-                player.targetX = e.clientX; 
-                fireBullet();
-            }
+            if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT' && e.target.id !== 'fireButton') { player.targetX = e.clientX; fireBullet(); }
         });
-
-        window.addEventListener('touchmove', (e) => {
-            if (!gameRunning) return;
-            e.preventDefault(); 
-            player.targetX = e.touches[0].clientX; 
-        }, { passive: false });
-
+        window.addEventListener('touchmove', (e) => { if (!gameRunning) return; e.preventDefault(); player.targetX = e.touches[0].clientX; }, { passive: false });
         window.addEventListener('touchstart', (e) => {
             if (!gameRunning) return;
-            if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT' && e.target.id !== 'fireButton') {
-                player.targetX = e.touches[0].clientX;
-                fireBullet(); 
-            }
+            if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT' && e.target.id !== 'fireButton') { player.targetX = e.touches[0].clientX; fireBullet(); }
         }, { passive: false });
 
         const fireButton = document.getElementById('fireButton');
         if(fireButton) {
-            fireButton.addEventListener('touchstart', (e) => {
-                e.preventDefault(); e.stopPropagation(); fireBullet();
-            }, { passive: false });
-            
-            fireButton.addEventListener('mousedown', (e) => {
-                e.preventDefault(); e.stopPropagation(); fireBullet();
-            });
+            fireButton.addEventListener('touchstart', (e) => { e.preventDefault(); e.stopPropagation(); fireBullet(); }, { passive: false });
+            fireButton.addEventListener('mousedown', (e) => { e.preventDefault(); e.stopPropagation(); fireBullet(); });
         }
-
-        window.addEventListener('keydown', (e) => {
-            if(e.code === 'Space' && gameRunning) {
-                if (e.repeat) return; 
-                e.preventDefault();
-                fireBullet();
-            }
-        });
+        window.addEventListener('keydown', (e) => { if(e.code === 'Space' && gameRunning) { if (e.repeat) return; e.preventDefault(); fireBullet(); } });
 
         function spawnEntities() {
-            // Tasa de aparición de enemigos
             if (Math.random() < 0.010 * difficultyMultiplier) enemies.push(new FallingObject('enemy'));
-            
-            // Tasa de aparición de coleccionables normales
             if (Math.random() < 0.008 * difficultyMultiplier) collectibles.push(new FallingObject('collectible'));
-            
-            // Tasa de aparición del Logo On Vacation (Menos frecuente, es un premio raro)
             if (Math.random() < 0.0015 * difficultyMultiplier) collectibles.push(new FallingObject('onvacation'));
         }
 
@@ -591,26 +453,19 @@
             bullets.forEach(bullet => {
                 enemies.forEach(enemy => {
                     if (!bullet.markedForDeletion && !enemy.markedForDeletion) {
-                        const dx = bullet.x - (enemy.x + Math.sin(enemy.wobble)*20);
-                        const dy = bullet.y - enemy.y;
+                        const dx = bullet.x - (enemy.x + Math.sin(enemy.wobble)*20); const dy = bullet.y - enemy.y;
                         if (Math.sqrt(dx*dx + dy*dy) < enemy.size) {
-                            bullet.markedForDeletion = true; enemy.markedForDeletion = true;
-                            addScore(15);
-                            createExplosion(enemy.x, enemy.y, '#f59e0b');
-                            createFloatingText("+15", enemy.x, enemy.y, "#4ade80");
+                            bullet.markedForDeletion = true; enemy.markedForDeletion = true; addScore(15);
+                            createExplosion(enemy.x, enemy.y, '#f59e0b'); createFloatingText("+15", enemy.x, enemy.y, "#4ade80");
                         }
                     }
                 });
-
                 collectibles.forEach(item => {
                     if (!bullet.markedForDeletion && !item.markedForDeletion) {
-                        const dx = bullet.x - (item.x + Math.sin(item.wobble)*20);
-                        const dy = bullet.y - item.y;
+                        const dx = bullet.x - (item.x + Math.sin(item.wobble)*20); const dy = bullet.y - item.y;
                         if (Math.sqrt(dx*dx + dy*dy) < item.size) {
-                            bullet.markedForDeletion = true; item.markedForDeletion = true;
-                            addScore(-20);
-                            createExplosion(item.x, item.y, '#ef4444');
-                            createFloatingText("¡NO DESTRUYAS!", item.x, item.y, "#ef4444");
+                            bullet.markedForDeletion = true; item.markedForDeletion = true; addScore(-20);
+                            createExplosion(item.x, item.y, '#ef4444'); createFloatingText("¡NO DESTRUYAS!", item.x, item.y, "#ef4444");
                         }
                     }
                 });
@@ -618,43 +473,27 @@
 
             enemies.forEach(enemy => {
                 if (!enemy.markedForDeletion) {
-                    const dx = player.x - (enemy.x + Math.sin(enemy.wobble)*20);
-                    const dy = player.y - enemy.y;
+                    const dx = player.x - (enemy.x + Math.sin(enemy.wobble)*20); const dy = player.y - enemy.y;
                     if (Math.sqrt(dx*dx + dy*dy) < (player.width/2.5 + enemy.size/2)) {
                         enemy.markedForDeletion = true; loseLife(1); 
-                        createExplosion(player.x, player.y, '#ef4444');
-                        createFloatingText("¡DAÑO!", player.x, player.y - 40, "#ef4444");
+                        createExplosion(player.x, player.y, '#ef4444'); createFloatingText("¡DAÑO!", player.x, player.y - 40, "#ef4444");
                     }
                 }
             });
 
             collectibles.forEach(item => {
                 if (!item.markedForDeletion) {
-                    const dx = player.x - (item.x + Math.sin(item.wobble)*20);
-                    const dy = player.y - item.y;
+                    const dx = player.x - (item.x + Math.sin(item.wobble)*20); const dy = player.y - item.y;
                     if (Math.sqrt(dx*dx + dy*dy) < (player.width/2.5 + item.size/2)) {
                         item.markedForDeletion = true; 
-                        
-                        // LOGICA ESPECIAL PARA EL LOGO ON VACATION (RECUPERA 1 VIDA ENTERA)
                         if (item.type === 'onvacation') {
-                            addScore(50);
-                            createExplosion(player.x, player.y, '#fde047');
-                            if (lives < 3) {
-                                lives = Math.min(3, lives + 1);
-                                updateUI();
-                                createFloatingText("+1 ❤️", player.x, player.y - 60, "#fb7185");
-                            } else {
-                                createFloatingText("¡BONO!", player.x, player.y - 60, "#fde047");
-                            }
+                            addScore(50); createExplosion(player.x, player.y, '#fde047');
+                            if (lives < 3) { lives = Math.min(3, lives + 1); updateUI(); createFloatingText("+1 ❤️", player.x, player.y - 60, "#fb7185"); } 
+                            else { createFloatingText("¡BONO!", player.x, player.y - 60, "#fde047"); }
                         } else {
-                            // COLECCIONABLES NORMALES
-                            addScore(30);
-                            createExplosion(player.x, player.y, '#38bdf8');
-                            createFloatingText("+30", player.x, player.y - 40, "#38bdf8");
+                            addScore(30); createExplosion(player.x, player.y, '#38bdf8'); createFloatingText("+30", player.x, player.y - 40, "#38bdf8");
                             if(lives < 3 && Math.random() < 0.35) {
-                                lives = Math.min(3, lives + 0.5);
-                                updateUI();
-                                createFloatingText("+0.5 ❤️", player.x, player.y - 60, "#fb7185");
+                                lives = Math.min(3, lives + 0.5); updateUI(); createFloatingText("+0.5 ❤️", player.x, player.y - 60, "#fb7185");
                             }
                         }
                     }
@@ -665,101 +504,85 @@
         function gameLoop(timestamp) {
             if (!gameRunning) return;
             requestAnimationFrame(gameLoop);
-
             const elapsed = timestamp - lastFrameTime;
             if (elapsed < frameDelay) return;
             lastFrameTime = timestamp - (elapsed % frameDelay);
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-
             bubbles.forEach(bubble => { bubble.update(); bubble.draw(); });
-            spawnEntities();
+            spawnEntities(); player.update(); player.draw();
 
-            player.update();
-            player.draw();
-
-            [...bullets, ...enemies, ...collectibles, ...particles, ...floatingTexts].forEach(entity => {
-                entity.update(); entity.draw();
-            });
-
+            [...bullets, ...enemies, ...collectibles, ...particles, ...floatingTexts].forEach(entity => { entity.update(); entity.draw(); });
             checkCollisions();
 
-            bullets = bullets.filter(b => !b.markedForDeletion);
-            enemies = enemies.filter(e => !e.markedForDeletion);
-            collectibles = collectibles.filter(c => !c.markedForDeletion);
-            particles = particles.filter(p => !p.markedForDeletion);
+            bullets = bullets.filter(b => !b.markedForDeletion); enemies = enemies.filter(e => !e.markedForDeletion);
+            collectibles = collectibles.filter(c => !c.markedForDeletion); particles = particles.filter(p => !p.markedForDeletion);
             floatingTexts = floatingTexts.filter(ft => !ft.markedForDeletion);
         }
 
         function startGame() {
             const nameInput = document.getElementById('playerName').value.trim();
-            if (!nameInput) {
-                document.getElementById('nameError').classList.remove('hidden');
+            
+            // CÓDIGO SECRETO DE ADMINISTRADOR PARA RESETEAR INTENTOS
+            if (nameInput.toUpperCase() === 'RESET') {
+                localStorage.removeItem('defensorAttempts');
+                currentAttempts = 0;
+                document.getElementById('playerName').value = '';
+                updateAttemptsUI();
+                alert("Historial de intentos borrado. Tienes 3 intentos nuevamente.");
                 return;
             }
+
+            if (!nameInput) { document.getElementById('nameError').classList.remove('hidden'); return; }
+            
+            // Validar límite y bloquear de forma segura
+            if (currentAttempts >= MAX_ATTEMPTS) {
+                alert("Ya no te quedan más intentos.");
+                return;
+            }
+            
+            // Registrar un intento nuevo y actualizar UI
+            currentAttempts++;
+            localStorage.setItem('defensorAttempts', currentAttempts.toString());
+            updateAttemptsUI();
+
             document.getElementById('nameError').classList.add('hidden');
             playerName = nameInput;
-            
-            score = 0;
-            lives = 3.0;
-            timeLeft = 420; 
-            difficultyMultiplier = 1;
-            
-            bullets = [];
-            enemies = [];
-            collectibles = [];
-            particles = [];
-            floatingTexts = [];
+            score = 0; lives = 3.0; timeLeft = 420; difficultyMultiplier = 1;
+            bullets = []; enemies = []; collectibles = []; particles = []; floatingTexts = [];
             bubbles = Array.from({length: 50}, () => new Bubble());
-            
             player = new Player();
             
             updateUI();
             document.getElementById('startScreen').classList.add('hidden');
             document.getElementById('timeDisplay').innerText = formatTime(timeLeft);
+            if (isMobile) document.getElementById('fireButton').classList.remove('hidden');
             
-            if (isMobile) {
-                document.getElementById('fireButton').classList.remove('hidden');
-            }
-            
-            gameRunning = true;
-            lastFireTime = performance.now();
-            lastFrameTime = performance.now();
+            gameRunning = true; lastFireTime = performance.now(); lastFrameTime = performance.now();
             requestAnimationFrame(gameLoop);
 
             timerInterval = setInterval(() => {
-                timeLeft--;
-                document.getElementById('timeDisplay').innerText = formatTime(timeLeft);
-                
+                timeLeft--; document.getElementById('timeDisplay').innerText = formatTime(timeLeft);
                 if (timeLeft > 0 && timeLeft % 60 === 0) {
-                    difficultyMultiplier += 0.1; 
-                    createFloatingText("¡AUMENTA VELOCIDAD!", canvas.width/2, canvas.height/2, "#fcd34d");
+                    difficultyMultiplier += 0.1; createFloatingText("¡AUMENTA VELOCIDAD!", canvas.width/2, canvas.height/2, "#fcd34d");
                 }
-
                 if (timeLeft <= 30) {
                     document.getElementById('timeDisplay').classList.add('text-red-500', 'animate-pulse');
                     document.getElementById('timeDisplay').classList.remove('text-teal-400');
                 }
-
-                if (timeLeft <= 0) {
-                    endGame("TIEMPO AGOTADO");
-                }
+                if (timeLeft <= 0) endGame("TIEMPO AGOTADO");
             }, 1000);
         }
 
         async function endGame(reason) {
-            gameRunning = false;
-            clearInterval(timerInterval);
-            
+            gameRunning = false; clearInterval(timerInterval);
             document.getElementById('fireButton').classList.add('hidden');
             document.getElementById('gameOverTitle').innerText = reason;
             document.getElementById('finalName').innerText = playerName;
             document.getElementById('finalScore').innerText = score;
             
-            let litrosSalvados = score * 5;
-            if (litrosSalvados < 0) litrosSalvados = 0;
+            let litrosSalvados = score * 5; if (litrosSalvados < 0) litrosSalvados = 0;
             document.getElementById('envImpact').innerText = `💧 Salvaste ${litrosSalvados} Litros`;
-            
             document.getElementById('gameOverScreen').classList.remove('hidden');
 
             await saveScoreToSupabase(playerName, score, litrosSalvados);
@@ -767,34 +590,23 @@
         }
 
         async function saveScoreToSupabase(name, finalScore, liters) {
-            if (!db) return; // Si hay error en Supabase, no bloquea el fin de juego
-            try {
-                await db.from('leaderboard').insert([{ name: name, score: finalScore, liters_saved: liters }]);
-            } catch (err) {
-                console.error("Error conectando a BD:", err);
-            }
+            if (!db) return;
+            try { await db.from('leaderboard').insert([{ name: name, score: finalScore, liters_saved: liters }]); } 
+            catch (err) { console.error("Error conectando a BD:", err); }
         }
 
         async function loadLeaderboard() {
             const listDiv = document.getElementById('leaderboardList');
-            if (!db) {
-                listDiv.innerHTML = `<p class="text-xs text-slate-400 text-center my-4">Agrega tus claves de Supabase al código para ver el ranking online.</p>`;
-                return;
-            }
-
+            if (!db) { listDiv.innerHTML = `<p class="text-xs text-slate-400 text-center my-4">Agrega tus claves de Supabase.</p>`; return; }
             try {
                 const { data, error } = await db.from('leaderboard').select('*').order('score', { ascending: false }).limit(3);
                 if (error) throw error;
-
                 if (data && data.length > 0) {
                     listDiv.innerHTML = ''; 
                     const medals = ['🥇', '🥈', '🥉'];
                     const colors = ['bg-yellow-500/20 border-yellow-500/50', 'bg-slate-300/20 border-slate-300/50', 'bg-orange-400/20 border-orange-400/50'];
-                    
                     data.forEach((playerObj, index) => {
-                        const style = colors[index] || 'bg-slate-800 border-slate-700';
-                        const medal = medals[index] || `${index + 1}.`;
-                        
+                        const style = colors[index] || 'bg-slate-800 border-slate-700'; const medal = medals[index] || `${index + 1}.`;
                         listDiv.innerHTML += `
                             <div class="flex justify-between items-center p-2 rounded-lg border ${style} mb-2 shadow-sm">
                                 <div class="flex items-center gap-2">
@@ -808,24 +620,17 @@
                             </div>
                         `;
                     });
-                } else {
-                    listDiv.innerHTML = `<p class="text-xs text-slate-400 text-center my-4">Aún no hay puntajes.</p>`;
-                }
-            } catch (err) {
-                listDiv.innerHTML = `<p class="text-xs text-red-400 text-center my-4">Error cargando el ranking.</p>`;
-            }
+                } else { listDiv.innerHTML = `<p class="text-xs text-slate-400 text-center my-4">Aún no hay puntajes.</p>`; }
+            } catch (err) { listDiv.innerHTML = `<p class="text-xs text-red-400 text-center my-4">Error cargando el ranking.</p>`; }
         }
 
-        // Suscripción protegida para tiempo real
         if (db) {
             try {
-                db.channel('public:leaderboard')
-                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'leaderboard' }, payload => {
+                db.channel('public:leaderboard').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'leaderboard' }, payload => {
                     if (!document.getElementById('gameOverScreen').classList.contains('hidden')) loadLeaderboard();
                 }).subscribe();
             } catch (e) { console.warn("Suscripción en tiempo real falló."); }
         }
-
     </script>
 </body>
 </html>
