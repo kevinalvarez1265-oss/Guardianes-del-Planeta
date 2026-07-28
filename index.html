@@ -16,10 +16,9 @@
             margin: 0; 
             padding: 0;
             width: 100vw;
-            height: 100dvh; /* Altura dinámica exacta para móviles */
+            height: 100dvh; 
             position: relative; 
             overflow: hidden; 
-            /* FONDO DE MAR (Degradado azul océano) */
             background: linear-gradient(180deg, #0284c7 0%, #0369a1 40%, #082f49 100%); 
             touch-action: none; 
             font-family: 'Inter', sans-serif; 
@@ -52,12 +51,11 @@
             box-sizing: border-box;
         }
         
-        /* BOTÓN DE DISPARO MÓVIL RESPONSIVO */
         #fireButton {
             position: absolute;
             bottom: max(30px, env(safe-area-inset-bottom));
             right: max(30px, env(safe-area-inset-right));
-            width: 75px;
+            width: 75px;  
             height: 75px;
             border-radius: 50%;
             background: radial-gradient(circle, #ef4444 0%, #b91c1c 100%);
@@ -81,13 +79,7 @@
         #fireButton.hidden { display: none !important; }
 
         @media (min-width: 768px) {
-            #fireButton {
-                width: 100px;
-                height: 100px;
-                bottom: 40px;
-                right: 40px;
-                font-size: 40px;
-            }
+            #fireButton { width: 100px; height: 100px; bottom: 40px; right: 40px; font-size: 40px; }
         }
         
         #leaderboardList::-webkit-scrollbar { width: 4px; }
@@ -164,15 +156,15 @@
                 <p class="text-[9px] sm:text-xs text-red-300 border-t border-slate-600 pt-1 mt-1"><strong>☠️ ¡Ojo!</strong> Si la basura tóxica toca el fondo, pierdes media vida.</p>
             </div>
 
-            <!-- SISTEMA ANTI-TRAMPA UI -->
-            <div id="limitMessage" class="hidden bg-red-900/80 p-3 rounded-xl border border-red-500 mb-4 animate-pulse">
-                <p class="text-white font-bold text-xs sm:text-sm">⛔ Has gastado tu único intento oficial.</p>
-            </div>
+            <!-- MENSAJE DE LÍMITE (Oculto por defecto) -->
+            <p id="limitMessage" class="hidden text-red-400 font-black text-xs sm:text-sm mb-2 bg-red-900/50 p-2 rounded-lg border border-red-500">
+                Has alcanzado el límite de intentos permitidos.
+            </p>
 
             <p id="nameError" class="text-red-400 font-black text-xs sm:text-sm mb-2 hidden animate-bounce">¡Debes ingresar tu nombre o apodo para jugar!</p>
             <input id="playerName" type="text" placeholder="Tu Nombre o Apodo" class="w-full p-2 sm:p-3 rounded-lg mb-4 text-center font-bold text-slate-800 focus:outline-none focus:ring-4 focus:ring-teal-500" maxlength="15">
             
-            <button id="startBtn" onclick="startGame()" class="w-full bg-teal-500 hover:bg-teal-400 text-slate-900 font-black text-lg sm:text-xl py-3 sm:py-4 rounded-xl pulse shadow-[0_0_15px_rgba(20,184,166,0.5)] transition-all duration-300">
+            <button id="btnStart" onclick="startGame()" class="w-full bg-teal-500 hover:bg-teal-400 text-slate-900 font-black text-lg sm:text-xl py-3 sm:py-4 rounded-xl pulse shadow-[0_0_15px_rgba(20,184,166,0.5)] transition-all duration-300">
                 ¡INICIAR MISIÓN! 🚀
             </button>
         </div>
@@ -207,7 +199,7 @@
             </div>
 
             <button onclick="location.reload()" class="w-full bg-white text-slate-900 hover:bg-slate-200 font-black text-base sm:text-lg py-2 sm:py-3 rounded-xl pointer-events-auto flex-shrink-0">
-                Ver Resultados y Salir
+                Continuar
             </button>
         </div>
     </div>
@@ -247,22 +239,10 @@
         const MAX_ATTEMPTS = 1;
         let currentAttempts = parseInt(localStorage.getItem('defensorAttempts')) || 0;
 
-        function checkAttemptsOnLoad() {
-            if (currentAttempts >= MAX_ATTEMPTS) {
-                document.getElementById('limitMessage').classList.remove('hidden');
-                document.getElementById('startBtn').innerText = "LÍMITE ALCANZADO ⛔";
-                document.getElementById('startBtn').classList.remove('bg-teal-500', 'hover:bg-teal-400', 'pulse');
-                document.getElementById('startBtn').classList.add('bg-slate-600', 'text-slate-400');
-            }
-        }
-        window.addEventListener('DOMContentLoaded', checkAttemptsOnLoad);
-
-        // ---------------------------------------------------------
-        // VARIABLES DEL JUEGO
-        // ---------------------------------------------------------
+        // Variables Globales
         let gameRunning = false;
         let score = 0;
-        let lives = 3.0;
+        let lives = 3.0; 
         let timeLeft = 420; 
         let timerInterval;
         let difficultyMultiplier = 1;
@@ -273,13 +253,7 @@
         const targetFPS = 60;
         const frameDelay = 1000 / targetFPS;
 
-        let player;
-        let bullets = [];
-        let enemies = [];
-        let collectibles = []; 
-        let particles = [];
-        let bubbles = [];
-        let floatingTexts = [];
+        let player, bullets = [], enemies = [], collectibles = [], particles = [], bubbles = [], floatingTexts = [];
 
         const ENEMY_TYPES = ['🛢️', '🥡', '🚬'];
         const COLLECTIBLE_TYPES = ['💊', '📦', '🧴'];
@@ -287,42 +261,23 @@
         const enemyImageSrcs = ['Plastico.png', 'Papel.png', 'Carton.png','Tetrapack.png','Vidrio.png','Metal.png','colilla.png'];
         const collectibleImageSrcs = ['reciclar.png'];
         
-        const enemyImages = enemyImageSrcs.map(src => {
-            const img = new Image();
-            img.src = src;
-            return img;
-        });
-
-        const collectibleImages = collectibleImageSrcs.map(src => {
-            const img = new Image();
-            img.src = src;
-            return img;
-        });
+        const enemyImages = enemyImageSrcs.map(src => { const img = new Image(); img.src = src; return img; });
+        const collectibleImages = collectibleImageSrcs.map(src => { const img = new Image(); img.src = src; return img; });
 
         class Player {
             constructor() {
-                this.width = 65;
-                this.height = 65;
-                this.x = canvas.width / 2;
-                this.y = canvas.height - 100;
+                this.width = 65; this.height = 65;
+                this.x = canvas.width / 2; this.y = canvas.height - 100;
                 this.targetX = this.x;
-                
-                this.image = new Image();
-                this.image.src = 'Nave.png';
+                this.image = new Image(); this.image.src = 'Nave.png';
                 this.imageLoaded = false;
-                
-                this.image.onload = () => {
-                    this.imageLoaded = true;
-                };
+                this.image.onload = () => { this.imageLoaded = true; };
             }
             draw() {
                 if (this.imageLoaded && this.image.naturalHeight !== 0) {
                     ctx.drawImage(this.image, this.x - this.width / 2, this.y - this.height / 2, this.width, this.height);
                 } else {
-                    ctx.font = "40px Arial";
-                    ctx.textAlign = "center";
-                    ctx.textBaseline = "middle";
-                    ctx.fillStyle = "#ffffff";
+                    ctx.font = "40px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillStyle = "#ffffff";
                     ctx.fillText("🛸", this.x, this.y);
                 }
             }
@@ -335,30 +290,18 @@
 
         class Bullet {
             constructor(x, y) {
-                this.x = x;
-                this.y = y;
-                this.width = 4;
-                this.height = 20;
-                this.speed = 12; 
-                this.markedForDeletion = false;
+                this.x = x; this.y = y; this.width = 4; this.height = 20; this.speed = 12; this.markedForDeletion = false;
             }
             draw() {
-                ctx.fillStyle = '#2dd4bf';
-                ctx.shadowColor = '#2dd4bf';
-                ctx.shadowBlur = 10;
-                ctx.fillRect(this.x - this.width/2, this.y, this.width, this.height);
-                ctx.shadowBlur = 0;
+                ctx.fillStyle = '#2dd4bf'; ctx.shadowColor = '#2dd4bf'; ctx.shadowBlur = 10;
+                ctx.fillRect(this.x - this.width/2, this.y, this.width, this.height); ctx.shadowBlur = 0;
             }
-            update() {
-                this.y -= this.speed;
-                if (this.y < -50) this.markedForDeletion = true;
-            }
+            update() { this.y -= this.speed; if (this.y < -50) this.markedForDeletion = true; }
         }
 
         class FallingObject {
             constructor(type) { 
-                this.type = type;
-                this.size = 40; 
+                this.type = type; this.size = 40; 
                 if(type === 'onvacation') this.size = 50; 
 
                 this.x = Math.random() * (canvas.width - this.size * 2) + this.size;
@@ -371,219 +314,118 @@
 
                 if (type === 'enemy') {
                     const idx = Math.floor(Math.random() * enemyImages.length);
-                    this.image = enemyImages[idx];
-                    this.emoji = ENEMY_TYPES[idx % ENEMY_TYPES.length];
+                    this.image = enemyImages[idx]; this.emoji = ENEMY_TYPES[idx % ENEMY_TYPES.length];
                 } else if (type === 'collectible') {
                     const idx = Math.floor(Math.random() * collectibleImages.length);
-                    this.image = collectibleImages[idx];
-                    this.emoji = COLLECTIBLE_TYPES[idx % COLLECTIBLE_TYPES.length];
+                    this.image = collectibleImages[idx]; this.emoji = COLLECTIBLE_TYPES[idx % COLLECTIBLE_TYPES.length];
                 } else if (type === 'onvacation') {
-                    this.image = new Image();
-                    this.image.src = 'logo-on-vacation.png';
-                    this.emoji = '🌴'; 
+                    this.image = new Image(); this.image.src = 'logo-on-vacation.png'; this.emoji = '🌴'; 
                 }
             }
             draw() {
                 const xOffset = Math.sin(this.wobble) * 20;
-                
                 if (this.image && this.image.complete && this.image.naturalHeight !== 0) {
                     ctx.drawImage(this.image, this.x + xOffset - this.size/2, this.y - this.size/2, this.size, this.size);
                 } else {
-                    ctx.font = "35px Arial";
-                    ctx.textAlign = "center";
-                    ctx.textBaseline = "middle";
-                    ctx.fillStyle = "#ffffff";
+                    ctx.font = "35px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillStyle = "#ffffff";
                     ctx.fillText(this.emoji, this.x + xOffset, this.y);
                 }
             }
             update() {
-                this.y += this.speed;
-                this.wobble += this.wobbleSpeed;
-                
+                this.y += this.speed; this.wobble += this.wobbleSpeed;
                 if (this.y > canvas.height + 50) {
                     this.markedForDeletion = true;
-                    if (this.isEnemy) {
-                        addScore(-5);
-                        loseLife(0.5); 
-                        createFloatingText("-0.5 ❤️", this.x, canvas.height - 30, "#ef4444");
-                    }
+                    if (this.isEnemy) { addScore(-5); loseLife(0.5); createFloatingText("-0.5 ❤️", this.x, canvas.height - 30, "#ef4444"); }
                 }
             }
         }
 
         class Particle {
             constructor(x, y, color) {
-                this.x = x;
-                this.y = y;
-                this.size = Math.random() * 5 + 2;
-                this.speedX = Math.random() * 6 - 3;
-                this.speedY = Math.random() * 6 - 3;
-                this.color = color;
-                this.life = 1.0;
-                this.markedForDeletion = false;
+                this.x = x; this.y = y; this.size = Math.random() * 5 + 2;
+                this.speedX = Math.random() * 6 - 3; this.speedY = Math.random() * 6 - 3;
+                this.color = color; this.life = 1.0; this.markedForDeletion = false;
             }
             draw() {
-                ctx.globalAlpha = this.life;
-                ctx.fillStyle = this.color;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.globalAlpha = 1.0;
+                ctx.globalAlpha = this.life; ctx.fillStyle = this.color; ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1.0;
             }
-            update() {
-                this.x += this.speedX;
-                this.y += this.speedY;
-                this.life -= 0.05;
-                if (this.life <= 0) this.markedForDeletion = true;
-            }
+            update() { this.x += this.speedX; this.y += this.speedY; this.life -= 0.05; if (this.life <= 0) this.markedForDeletion = true; }
         }
 
         class FloatingText {
             constructor(text, x, y, color) {
-                this.text = text;
-                this.x = x;
-                this.y = y;
-                this.color = color;
-                this.life = 1.0;
-                this.markedForDeletion = false;
+                this.text = text; this.x = x; this.y = y; this.color = color; this.life = 1.0; this.markedForDeletion = false;
             }
             draw() {
-                ctx.globalAlpha = this.life;
-                ctx.fillStyle = this.color;
-                ctx.font = "bold 20px Inter, sans-serif";
-                ctx.textAlign = "center";
-                ctx.fillText(this.text, this.x, this.y);
-                ctx.globalAlpha = 1.0;
+                ctx.globalAlpha = this.life; ctx.fillStyle = this.color; ctx.font = "bold 20px Inter, sans-serif";
+                ctx.textAlign = "center"; ctx.fillText(this.text, this.x, this.y); ctx.globalAlpha = 1.0;
             }
-            update() {
-                this.y -= 2;
-                this.life -= 0.02;
-                if (this.life <= 0) this.markedForDeletion = true;
-            }
+            update() { this.y -= 2; this.life -= 0.02; if (this.life <= 0) this.markedForDeletion = true; }
         }
 
         class Bubble {
             constructor() {
-                this.x = Math.random() * canvas.width;
-                this.y = canvas.height + Math.random() * 100;
-                this.size = Math.random() * 4 + 1;
-                this.speed = Math.random() * 2 + 1;
+                this.x = Math.random() * canvas.width; this.y = canvas.height + Math.random() * 100;
+                this.size = Math.random() * 4 + 1; this.speed = Math.random() * 2 + 1;
             }
             draw() {
-                ctx.fillStyle = "rgba(255, 255, 255, 0.2)"; 
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
+                ctx.fillStyle = "rgba(255, 255, 255, 0.2)"; ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
             }
             update() {
                 this.y -= this.speed;
-                if (this.y < -10) {
-                    this.y = canvas.height + 10;
-                    this.x = Math.random() * canvas.width;
-                }
+                if (this.y < -10) { this.y = canvas.height + 10; this.x = Math.random() * canvas.width; }
             }
         }
 
-        function createExplosion(x, y, color) {
-            for (let i = 0; i < 15; i++) particles.push(new Particle(x, y, color));
-        }
-
-        function createFloatingText(text, x, y, color) {
-            floatingTexts.push(new FloatingText(text, x, y, color));
-        }
+        function createExplosion(x, y, color) { for (let i = 0; i < 15; i++) particles.push(new Particle(x, y, color)); }
+        function createFloatingText(text, x, y, color) { floatingTexts.push(new FloatingText(text, x, y, color)); }
 
         function updateUI() {
             document.getElementById('scoreDisplay').innerText = score;
-            let hearts = "";
-            let fullHearts = Math.floor(lives);
-            let hasHalfHeart = (lives % 1) >= 0.5;
-            
+            let hearts = ""; let fullHearts = Math.floor(lives); let hasHalfHeart = (lives % 1) >= 0.5;
             for(let i = 0; i < fullHearts; i++) hearts += "❤️";
             if (hasHalfHeart) hearts += "💔";
-            
             document.getElementById('livesDisplay').innerText = hearts;
         }
 
-        function addScore(amount) {
-            score += amount;
-            if (score < 0) score = 0;
-            updateUI();
-        }
+        function addScore(amount) { score += amount; if (score < 0) score = 0; updateUI(); }
 
         function loseLife(amount) {
-            lives -= amount;
-            if (lives <= 0) lives = 0;
-            
-            updateUI();
-            
+            lives -= amount; if (lives <= 0) lives = 0; updateUI();
             document.getElementById('ui-bar').classList.add('bg-red-500/50');
             setTimeout(() => document.getElementById('ui-bar').classList.remove('bg-red-500/50'), 200);
-
-            if (lives <= 0) {
-                endGame("TOXICIDAD CRÍTICA");
-            }
+            if (lives <= 0) endGame("TOXICIDAD CRÍTICA");
         }
 
         function formatTime(seconds) {
-            const m = Math.floor(seconds / 60);
-            const s = seconds % 60;
+            const m = Math.floor(seconds / 60); const s = seconds % 60;
             return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
         }
 
         function fireBullet() {
-            if (!gameRunning) return;
-            const timestamp = performance.now();
-            if (timestamp - lastFireTime > 150) {
-                bullets.push(new Bullet(player.x, player.y - 20));
-                lastFireTime = timestamp;
-            }
+            if (!gameRunning) return; const timestamp = performance.now();
+            if (timestamp - lastFireTime > 150) { bullets.push(new Bullet(player.x, player.y - 20)); lastFireTime = timestamp; }
         }
 
-        window.addEventListener('mousemove', (e) => {
-            if (!gameRunning) return;
-            player.targetX = e.clientX;
-        });
-
+        window.addEventListener('mousemove', (e) => { if (!gameRunning) return; player.targetX = e.clientX; });
         window.addEventListener('mousedown', (e) => {
             if (!gameRunning) return;
-            if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT' && e.target.id !== 'fireButton') {
-                player.targetX = e.clientX; 
-                fireBullet();
-            }
+            if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT' && e.target.id !== 'fireButton') { player.targetX = e.clientX; fireBullet(); }
         });
-
-        window.addEventListener('touchmove', (e) => {
-            if (!gameRunning) return;
-            e.preventDefault(); 
-            player.targetX = e.touches[0].clientX; 
-        }, { passive: false });
-
+        window.addEventListener('touchmove', (e) => { if (!gameRunning) return; e.preventDefault(); player.targetX = e.touches[0].clientX; }, { passive: false });
         window.addEventListener('touchstart', (e) => {
             if (!gameRunning) return;
-            if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT' && e.target.id !== 'fireButton') {
-                player.targetX = e.touches[0].clientX;
-                fireBullet(); 
-            }
+            if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT' && e.target.id !== 'fireButton') { player.targetX = e.touches[0].clientX; fireBullet(); }
         }, { passive: false });
 
         const fireButton = document.getElementById('fireButton');
         if(fireButton) {
-            fireButton.addEventListener('touchstart', (e) => {
-                e.preventDefault(); e.stopPropagation(); fireBullet();
-            }, { passive: false });
-            
-            fireButton.addEventListener('mousedown', (e) => {
-                e.preventDefault(); e.stopPropagation(); fireBullet();
-            });
+            fireButton.addEventListener('touchstart', (e) => { e.preventDefault(); e.stopPropagation(); fireBullet(); }, { passive: false });
+            fireButton.addEventListener('mousedown', (e) => { e.preventDefault(); e.stopPropagation(); fireBullet(); });
         }
-
-        window.addEventListener('keydown', (e) => {
-            if(e.code === 'Space' && gameRunning) {
-                if (e.repeat) return; 
-                e.preventDefault();
-                fireBullet();
-            }
-        });
+        window.addEventListener('keydown', (e) => { if(e.code === 'Space' && gameRunning) { if (e.repeat) return; e.preventDefault(); fireBullet(); } });
 
         function spawnEntities() {
             if (Math.random() < 0.010 * difficultyMultiplier) enemies.push(new FallingObject('enemy'));
@@ -595,26 +437,19 @@
             bullets.forEach(bullet => {
                 enemies.forEach(enemy => {
                     if (!bullet.markedForDeletion && !enemy.markedForDeletion) {
-                        const dx = bullet.x - (enemy.x + Math.sin(enemy.wobble)*20);
-                        const dy = bullet.y - enemy.y;
+                        const dx = bullet.x - (enemy.x + Math.sin(enemy.wobble)*20); const dy = bullet.y - enemy.y;
                         if (Math.sqrt(dx*dx + dy*dy) < enemy.size) {
-                            bullet.markedForDeletion = true; enemy.markedForDeletion = true;
-                            addScore(15);
-                            createExplosion(enemy.x, enemy.y, '#f59e0b');
-                            createFloatingText("+15", enemy.x, enemy.y, "#4ade80");
+                            bullet.markedForDeletion = true; enemy.markedForDeletion = true; addScore(15);
+                            createExplosion(enemy.x, enemy.y, '#f59e0b'); createFloatingText("+15", enemy.x, enemy.y, "#4ade80");
                         }
                     }
                 });
-
                 collectibles.forEach(item => {
                     if (!bullet.markedForDeletion && !item.markedForDeletion) {
-                        const dx = bullet.x - (item.x + Math.sin(item.wobble)*20);
-                        const dy = bullet.y - item.y;
+                        const dx = bullet.x - (item.x + Math.sin(item.wobble)*20); const dy = bullet.y - item.y;
                         if (Math.sqrt(dx*dx + dy*dy) < item.size) {
-                            bullet.markedForDeletion = true; item.markedForDeletion = true;
-                            addScore(-20);
-                            createExplosion(item.x, item.y, '#ef4444');
-                            createFloatingText("¡NO DESTRUYAS!", item.x, item.y, "#ef4444");
+                            bullet.markedForDeletion = true; item.markedForDeletion = true; addScore(-20);
+                            createExplosion(item.x, item.y, '#ef4444'); createFloatingText("¡NO DESTRUYAS!", item.x, item.y, "#ef4444");
                         }
                     }
                 });
@@ -622,41 +457,27 @@
 
             enemies.forEach(enemy => {
                 if (!enemy.markedForDeletion) {
-                    const dx = player.x - (enemy.x + Math.sin(enemy.wobble)*20);
-                    const dy = player.y - enemy.y;
+                    const dx = player.x - (enemy.x + Math.sin(enemy.wobble)*20); const dy = player.y - enemy.y;
                     if (Math.sqrt(dx*dx + dy*dy) < (player.width/2.5 + enemy.size/2)) {
                         enemy.markedForDeletion = true; loseLife(1); 
-                        createExplosion(player.x, player.y, '#ef4444');
-                        createFloatingText("¡DAÑO!", player.x, player.y - 40, "#ef4444");
+                        createExplosion(player.x, player.y, '#ef4444'); createFloatingText("¡DAÑO!", player.x, player.y - 40, "#ef4444");
                     }
                 }
             });
 
             collectibles.forEach(item => {
                 if (!item.markedForDeletion) {
-                    const dx = player.x - (item.x + Math.sin(item.wobble)*20);
-                    const dy = player.y - item.y;
+                    const dx = player.x - (item.x + Math.sin(item.wobble)*20); const dy = player.y - item.y;
                     if (Math.sqrt(dx*dx + dy*dy) < (player.width/2.5 + item.size/2)) {
                         item.markedForDeletion = true; 
-                        
                         if (item.type === 'onvacation') {
-                            addScore(50);
-                            createExplosion(player.x, player.y, '#fde047');
-                            if (lives < 3) {
-                                lives = Math.min(3, lives + 1);
-                                updateUI();
-                                createFloatingText("+1 ❤️", player.x, player.y - 60, "#fb7185");
-                            } else {
-                                createFloatingText("¡BONO!", player.x, player.y - 60, "#fde047");
-                            }
+                            addScore(50); createExplosion(player.x, player.y, '#fde047');
+                            if (lives < 3) { lives = Math.min(3, lives + 1); updateUI(); createFloatingText("+1 ❤️", player.x, player.y - 60, "#fb7185"); } 
+                            else { createFloatingText("¡BONO!", player.x, player.y - 60, "#fde047"); }
                         } else {
-                            addScore(30);
-                            createExplosion(player.x, player.y, '#38bdf8');
-                            createFloatingText("+30", player.x, player.y - 40, "#38bdf8");
+                            addScore(30); createExplosion(player.x, player.y, '#38bdf8'); createFloatingText("+30", player.x, player.y - 40, "#38bdf8");
                             if(lives < 3 && Math.random() < 0.35) {
-                                lives = Math.min(3, lives + 0.5);
-                                updateUI();
-                                createFloatingText("+0.5 ❤️", player.x, player.y - 60, "#fb7185");
+                                lives = Math.min(3, lives + 0.5); updateUI(); createFloatingText("+0.5 ❤️", player.x, player.y - 60, "#fb7185");
                             }
                         }
                     }
@@ -667,29 +488,19 @@
         function gameLoop(timestamp) {
             if (!gameRunning) return;
             requestAnimationFrame(gameLoop);
-
             const elapsed = timestamp - lastFrameTime;
             if (elapsed < frameDelay) return;
             lastFrameTime = timestamp - (elapsed % frameDelay);
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-
             bubbles.forEach(bubble => { bubble.update(); bubble.draw(); });
-            spawnEntities();
+            spawnEntities(); player.update(); player.draw();
 
-            player.update();
-            player.draw();
-
-            [...bullets, ...enemies, ...collectibles, ...particles, ...floatingTexts].forEach(entity => {
-                entity.update(); entity.draw();
-            });
-
+            [...bullets, ...enemies, ...collectibles, ...particles, ...floatingTexts].forEach(entity => { entity.update(); entity.draw(); });
             checkCollisions();
 
-            bullets = bullets.filter(b => !b.markedForDeletion);
-            enemies = enemies.filter(e => !e.markedForDeletion);
-            collectibles = collectibles.filter(c => !c.markedForDeletion);
-            particles = particles.filter(p => !p.markedForDeletion);
+            bullets = bullets.filter(b => !b.markedForDeletion); enemies = enemies.filter(e => !e.markedForDeletion);
+            collectibles = collectibles.filter(c => !c.markedForDeletion); particles = particles.filter(p => !p.markedForDeletion);
             floatingTexts = floatingTexts.filter(ft => !ft.markedForDeletion);
         }
 
@@ -697,26 +508,19 @@
             const nameInput = document.getElementById('playerName').value.trim();
             const errorEl = document.getElementById('nameError');
             
-            // 1. LÓGICA DE RESETEO (Se ejecuta sin importar el límite)
+            // 1. LÓGICA DE RESETEO
             if (nameInput.toUpperCase() === 'RESET') {
                 localStorage.setItem('defensorAttempts', '0');
                 currentAttempts = 0;
                 document.getElementById('playerName').value = '';
-                
-                // Mostrar éxito
                 errorEl.innerText = "¡Sistema reseteado! Tienes 1 intento disponible.";
                 errorEl.className = "text-green-400 font-black text-xs sm:text-sm mb-2 animate-bounce";
                 errorEl.classList.remove('hidden');
-                
-                // Desbloquear botón
-                document.getElementById('startBtn').innerText = "¡INICIAR MISIÓN! 🚀";
-                document.getElementById('startBtn').classList.remove('bg-slate-600', 'text-slate-400');
-                document.getElementById('startBtn').classList.add('bg-teal-500', 'hover:bg-teal-400', 'pulse');
                 document.getElementById('limitMessage').classList.add('hidden');
-                return; // Cortar ejecución aquí
+                return;
             }
 
-            // 2. VERIFICAR LÍMITE
+            // 2. VERIFICAR LÍMITE DE INTENTOS
             if (currentAttempts >= MAX_ATTEMPTS) {
                 document.getElementById('limitMessage').classList.remove('hidden');
                 errorEl.classList.add('hidden');
@@ -737,68 +541,43 @@
             
             // REGISTRAR INTENTO EN EL NAVEGADOR
             currentAttempts++;
-            localStorage.setItem('defensorAttempts', currentAttempts);
+            localStorage.setItem('defensorAttempts', currentAttempts.toString());
             
-            score = 0;
-            lives = 3.0;
-            timeLeft = 420; 
-            difficultyMultiplier = 1;
-            
-            bullets = [];
-            enemies = [];
-            collectibles = [];
-            particles = [];
-            floatingTexts = [];
+            score = 0; lives = 3.0; timeLeft = 420; difficultyMultiplier = 1;
+            bullets = []; enemies = []; collectibles = []; particles = []; floatingTexts = [];
             bubbles = Array.from({length: 50}, () => new Bubble());
-            
             player = new Player();
             
             updateUI();
             document.getElementById('startScreen').classList.add('hidden');
             document.getElementById('timeDisplay').innerText = formatTime(timeLeft);
+            if (isMobile) document.getElementById('fireButton').classList.remove('hidden');
             
-            if (isMobile) {
-                document.getElementById('fireButton').classList.remove('hidden');
-            }
-            
-            gameRunning = true;
-            lastFireTime = performance.now();
-            lastFrameTime = performance.now();
+            gameRunning = true; lastFireTime = performance.now(); lastFrameTime = performance.now();
             requestAnimationFrame(gameLoop);
 
             timerInterval = setInterval(() => {
-                timeLeft--;
-                document.getElementById('timeDisplay').innerText = formatTime(timeLeft);
-                
+                timeLeft--; document.getElementById('timeDisplay').innerText = formatTime(timeLeft);
                 if (timeLeft > 0 && timeLeft % 60 === 0) {
-                    difficultyMultiplier += 0.1; 
-                    createFloatingText("¡AUMENTA VELOCIDAD!", canvas.width/2, canvas.height/2, "#fcd34d");
+                    difficultyMultiplier += 0.1; createFloatingText("¡AUMENTA VELOCIDAD!", canvas.width/2, canvas.height/2, "#fcd34d");
                 }
-
                 if (timeLeft <= 30) {
                     document.getElementById('timeDisplay').classList.add('text-red-500', 'animate-pulse');
                     document.getElementById('timeDisplay').classList.remove('text-teal-400');
                 }
-
-                if (timeLeft <= 0) {
-                    endGame("TIEMPO AGOTADO");
-                }
+                if (timeLeft <= 0) endGame("TIEMPO AGOTADO");
             }, 1000);
         }
 
         async function endGame(reason) {
-            gameRunning = false;
-            clearInterval(timerInterval);
-            
+            gameRunning = false; clearInterval(timerInterval);
             document.getElementById('fireButton').classList.add('hidden');
             document.getElementById('gameOverTitle').innerText = reason;
             document.getElementById('finalName').innerText = playerName;
             document.getElementById('finalScore').innerText = score;
             
-            let litrosSalvados = score * 5;
-            if (litrosSalvados < 0) litrosSalvados = 0;
+            let litrosSalvados = score * 5; if (litrosSalvados < 0) litrosSalvados = 0;
             document.getElementById('envImpact').innerText = `💧 Salvaste ${litrosSalvados} Litros`;
-            
             document.getElementById('gameOverScreen').classList.remove('hidden');
 
             await saveScoreToSupabase(playerName, score, litrosSalvados);
@@ -807,33 +586,22 @@
 
         async function saveScoreToSupabase(name, finalScore, liters) {
             if (!db) return;
-            try {
-                await db.from('leaderboard').insert([{ name: name, score: finalScore, liters_saved: liters }]);
-            } catch (err) {
-                console.error("Error conectando a BD:", err);
-            }
+            try { await db.from('leaderboard').insert([{ name: name, score: finalScore, liters_saved: liters }]); } 
+            catch (err) { console.error("Error conectando a BD:", err); }
         }
 
         async function loadLeaderboard() {
             const listDiv = document.getElementById('leaderboardList');
-            if (!db) {
-                listDiv.innerHTML = `<p class="text-xs text-slate-400 text-center my-4">Agrega tus claves de Supabase al código para ver el ranking online.</p>`;
-                return;
-            }
-
+            if (!db) { listDiv.innerHTML = `<p class="text-xs text-slate-400 text-center my-4">Agrega tus claves de Supabase.</p>`; return; }
             try {
                 const { data, error } = await db.from('leaderboard').select('*').order('score', { ascending: false }).limit(3);
                 if (error) throw error;
-
                 if (data && data.length > 0) {
                     listDiv.innerHTML = ''; 
                     const medals = ['🥇', '🥈', '🥉'];
                     const colors = ['bg-yellow-500/20 border-yellow-500/50', 'bg-slate-300/20 border-slate-300/50', 'bg-orange-400/20 border-orange-400/50'];
-                    
                     data.forEach((playerObj, index) => {
-                        const style = colors[index] || 'bg-slate-800 border-slate-700';
-                        const medal = medals[index] || `${index + 1}.`;
-                        
+                        const style = colors[index] || 'bg-slate-800 border-slate-700'; const medal = medals[index] || `${index + 1}.`;
                         listDiv.innerHTML += `
                             <div class="flex justify-between items-center p-2 rounded-lg border ${style} mb-2 shadow-sm">
                                 <div class="flex items-center gap-2">
@@ -847,12 +615,8 @@
                             </div>
                         `;
                     });
-                } else {
-                    listDiv.innerHTML = `<p class="text-xs text-slate-400 text-center my-4">Aún no hay puntajes.</p>`;
-                }
-            } catch (err) {
-                listDiv.innerHTML = `<p class="text-xs text-red-400 text-center my-4">Error cargando el ranking.</p>`;
-            }
+                } else { listDiv.innerHTML = `<p class="text-xs text-slate-400 text-center my-4">Aún no hay puntajes.</p>`; }
+            } catch (err) { listDiv.innerHTML = `<p class="text-xs text-red-400 text-center my-4">Error cargando el ranking.</p>`; }
         }
 
         if (db) {
